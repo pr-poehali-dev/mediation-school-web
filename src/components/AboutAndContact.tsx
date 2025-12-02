@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -6,10 +7,15 @@ import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/ui/icon';
 
 interface Teacher {
+  id: number;
   name: string;
   position: string;
   experience: string;
   image: string;
+  bio?: string | null;
+  specialization?: string | null;
+  yearsOfPractice?: number | null;
+  successfulCases?: number | null;
 }
 
 interface AboutAndContactProps {
@@ -17,26 +23,44 @@ interface AboutAndContactProps {
 }
 
 const AboutAndContact = ({ scrollToSection }: AboutAndContactProps) => {
-  const teachers: Teacher[] = [
-    {
-      name: 'Анна Петрова',
-      position: 'Руководитель программы',
-      experience: 'Более 15 лет практики в медиации, аккредитованный медиатор',
-      image: '👩‍🏫'
-    },
-    {
-      name: 'Михаил Соколов',
-      position: 'Эксперт по бизнес-медиации',
-      experience: '12 лет опыта, более 300 успешных кейсов',
-      image: '👨‍💼'
-    },
-    {
-      name: 'Елена Волкова',
-      position: 'Специалист по семейной медиации',
-      experience: 'Психолог, медиатор, 10 лет практики',
-      image: '👩‍⚕️'
-    }
-  ];
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('https://functions.poehali.dev/5b012cdc-fbdb-4620-b301-676ca9f9e4fb')
+      .then(response => response.json())
+      .then(data => {
+        setTeachers(data.teachers || []);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching teachers:', error);
+        setTeachers([
+          {
+            id: 1,
+            name: 'Анна Петрова',
+            position: 'Руководитель программы',
+            experience: 'Более 15 лет практики в медиации, аккредитованный медиатор',
+            image: '👩‍🏫'
+          },
+          {
+            id: 2,
+            name: 'Михаил Соколов',
+            position: 'Эксперт по бизнес-медиации',
+            experience: '12 лет опыта, более 300 успешных кейсов',
+            image: '👨‍💼'
+          },
+          {
+            id: 3,
+            name: 'Елена Волкова',
+            position: 'Специалист по семейной медиации',
+            experience: 'Психолог, медиатор, 10 лет практики',
+            image: '👩‍⚕️'
+          }
+        ]);
+        setLoading(false);
+      });
+  }, []);
 
   return (
     <>
@@ -103,17 +127,24 @@ const AboutAndContact = ({ scrollToSection }: AboutAndContactProps) => {
 
             <div className="mb-8">
               <h3 className="text-2xl font-bold mb-6 text-center">Наши преподаватели</h3>
-              <div className="grid md:grid-cols-3 gap-6">
-                {teachers.map((teacher, idx) => (
-                  <Card key={idx} className="text-center hover:shadow-lg transition-shadow">
-                    <CardContent className="pt-6">
-                      <div className="text-6xl mb-4">{teacher.image}</div>
-                      <h4 className="font-semibold text-lg mb-1">{teacher.name}</h4>
-                      <p className="text-sm text-primary font-medium mb-2">{teacher.position}</p>
-                      <p className="text-sm text-muted-foreground">{teacher.experience}</p>
-                    </CardContent>
-                  </Card>
-                ))}
+              {loading ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Загрузка...</p>
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-3 gap-6">
+                  {teachers.map((teacher) => (
+                    <Card key={teacher.id} className="text-center hover:shadow-lg transition-shadow">
+                      <CardContent className="pt-6">
+                        <div className="text-6xl mb-4">{teacher.image}</div>
+                        <h4 className="font-semibold text-lg mb-1">{teacher.name}</h4>
+                        <p className="text-sm text-primary font-medium mb-2">{teacher.position}</p>
+                        <p className="text-sm text-muted-foreground">{teacher.experience}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
               </div>
             </div>
           </div>
